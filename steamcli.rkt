@@ -2,9 +2,7 @@
 
 #lang racket/base
 
-(require (only-in racket/port 
-                  port->lines)
-         (only-in racket/string 
+(require (only-in racket/string 
                   string-split 
                   string-normalize-spaces 
                   string-suffix?)
@@ -12,8 +10,6 @@
                   system)
          (only-in racket/pretty 
                   pretty-print)
-         (only-in racket/format 
-                  ~a)
          (only-in racket/cmdline
                   command-line))
 
@@ -25,6 +21,19 @@
   (displayln "'launch <appid>' tells Steam to run app with <appid>")
   (displayln "'dump' prints metadata for every app")
   (exit 1))
+
+; Make str take up at least minspace spaces
+(define (pad-string str minspace)
+  (if (>= (string-length str) minspace)
+    str
+    (let ([newstr (make-string minspace #\space)])
+      (string-copy! newstr 0 str)
+      newstr)))
+
+; Turn a path into a list of strings
+(define (path->lines path)
+  (define (read-lines p) (if (eof-object? (peek-byte p)) '() (cons (read-line p) (read-lines p))))
+  (call-with-input-file path read-lines))
 
 ; Steams installation directory
 (define *steam-path*
@@ -46,10 +55,6 @@
   (define (pair-len-2? p) (= 2 (length p)))
   (filter pair-len-2? (map line->pair lines)))
 
-; Turn a path into a list of strings
-(define (path->lines path)
-  (call-with-input-file path port->lines))
-
 (define (path->alst path)
   (lines->assoclst (path->lines path)))
 
@@ -70,7 +75,7 @@
 
 (define (print-name-appid assoclst)
   (printf "~a ~a ~%"  
-          (~a (cadr (assoc "appid" assoclst)) #:min-width 8)
+          (pad-string (cadr (assoc "appid" assoclst)) 8)
           (cadr (assoc "name" assoclst))))
 
 ;; Returns the assoc list of the app which matches the given appid
