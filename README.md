@@ -24,7 +24,7 @@ or simply `make`
 
 # Usage
 
-'$ ./steamcli.rkt' outputs
+`$ ./steamcli.rkt` outputs
 
 ```
 Usage: ./steamcli [list]
